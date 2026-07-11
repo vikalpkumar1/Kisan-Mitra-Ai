@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>AI Kisan — किसान का डिजिटल साथी</title>
+<meta name="description" content="मुफ़्त AI किसान सहायक: फसल रोग पहचान, मौसम, सिंचाई, उर्वरक, सरकारी योजना, भाव और आवाज़ सहायक।">
+<meta name="theme-color" content="#24395C">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Hind:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --wheat:#FBF3E2;
+  --wheat-deep:#F0E1BE;
+  --soil:#2A2014;
+  --soil-soft:#6B5A42;
+  --turmeric:#C98A28;
+  --turmeric-deep:#A66F1C;
+  --leaf:#3B7A54;
+  --leaf-deep:#295C3D;
+  --sky:#3E7C99;
+  --sky-deep:#2E6178;
+  --clay:#AE4B30;
+  --clay-deep:#8C3A24;
+  --indigo:#24395C;
+  --indigo-deep:#172943;
+  --card:#FFFEF9;
+  --line:#E3D2A6;
+  --shadow:0 6px 20px rgba(42,32,20,.10);
+  --shadow-lift:0 10px 26px rgba(42,32,20,.16);
+  --radius:20px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;background:var(--wheat);color:var(--soil);font-family:'Hind',sans-serif;}
+body{min-height:100vh;overscroll-behavior-y:contain;background-image:radial-gradient(circle at 6px 6px, rgba(42,32,20,.05) 1px, transparent 1px);background-size:22px 22px;}
+h1,h2,h3,.display{font-family:'Baloo 2',sans-serif;}
+button{font-family:inherit;}
+:focus-visible{outline:2.5px solid var(--indigo);outline-offset:2px;border-radius:8px;}
+#app{max-width:520px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--wheat);position:relative;padding-bottom:80px;box-shadow:0 0 60px rgba(42,32,20,.08);}
+
+/* ---------- decorative kantha-stitch divider ---------- */
+.kantha{height:7px;background-image:repeating-linear-gradient(115deg,var(--turmeric) 0 6px,transparent 6px 12px);opacity:.55;}
+
+/* ---------- Topbar ---------- */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;position:sticky;top:0;z-index:20;background:linear-gradient(160deg,var(--indigo) 0%,var(--indigo-deep) 100%);box-shadow:0 4px 16px rgba(23,41,67,.25);}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-mark{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,var(--turmeric),var(--clay));display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 12px rgba(0,0,0,.25),inset 0 0 0 1.5px rgba(255,255,255,.35);}
+.brand-text .display{font-size:21px;font-weight:800;line-height:1;margin:0;color:#fff;letter-spacing:.01em;}
+.brand-text small{font-size:11px;color:#D9C79A;font-weight:600;}
+.free-badge{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--turmeric),var(--turmeric-deep));color:#241804;font-size:11px;font-weight:800;padding:7px 12px;border-radius:100px;letter-spacing:.02em;white-space:nowrap;box-shadow:0 3px 10px rgba(201,138,40,.4);}
+.free-badge::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,.65),transparent);animation:shine 3.2s ease-in-out infinite;}
+@keyframes shine{0%,60%{left:-60%;}100%{left:130%;}}
+
+/* ---------- Views ---------- */
+.view{display:none;padding:0 18px 18px;animation:fadeIn .28s ease;}
+.view.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.panel-header{display:flex;align-items:center;gap:10px;margin:4px 0 16px;position:sticky;top:0;background:var(--wheat);padding:12px 0 8px;z-index:15;}
+.back-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--card);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;color:var(--soil);box-shadow:var(--shadow);transition:transform .12s ease;}
+.back-btn:active{transform:scale(.92);}
+.panel-title{font-family:'Baloo 2',sans-serif;font-size:19px;font-weight:700;margin:0;}
+.panel-sub{font-size:12.5px;color:var(--soil-soft);margin:1px 0 0;}
+
+/* ---------- Hero / Ritu Chakra season wheel ---------- */
+.hero{display:flex;align-items:center;gap:18px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 16px;box-shadow:var(--shadow-lift);margin:16px 0 14px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(201,138,40,.14),transparent 70%);}
+.wheel-wrap{position:relative;width:92px;height:92px;flex-shrink:0;}
+.wheel{width:92px;height:92px;border-radius:50%;
+  background:
+    repeating-conic-gradient(from 0deg, rgba(255,253,249,.9) 0deg 1.2deg, transparent 1.2deg 30deg),
+    conic-gradient(from 0deg,var(--turmeric) 0deg 90deg,var(--sky) 90deg 150deg,var(--leaf) 150deg 300deg,var(--turmeric) 300deg 360deg);
+  position:relative;box-shadow:inset 0 0 0 6px var(--card),0 0 0 1.5px var(--turmeric-deep),var(--shadow);}
+.wheel-center{position:absolute;top:50%;left:50%;width:42px;height:42px;background:linear-gradient(135deg,var(--card),var(--wheat-deep));border-radius:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 0 0 1.5px var(--turmeric-deep),0 3px 8px rgba(42,32,20,.18);}
+.wheel-marker{position:absolute;top:50%;left:50%;width:5px;height:5px;background:var(--indigo);border-radius:50%;box-shadow:0 0 0 3px var(--wheat),0 0 0 4px var(--indigo),0 0 8px rgba(36,57,92,.5);}
+.hero-text .season-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--turmeric-deep);}
+.hero-text h2{font-size:17px;margin:3px 0 4px;}
+.hero-text p{font-size:12.5px;color:var(--soil-soft);margin:0;line-height:1.45;}
+
+/* ---------- Weather strip ---------- */
+.weather-strip{background:linear-gradient(135deg,var(--sky),var(--sky-deep));border-radius:var(--radius);padding:16px 17px;color:#fff;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-lift);margin-bottom:14px;cursor:pointer;position:relative;overflow:hidden;transition:transform .12s ease;}
+.weather-strip:active{transform:scale(.98);}
+.weather-strip::before{content:'';position:absolute;bottom:-40px;left:-20px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.10),transparent 70%);}
+.weather-strip .wtemp{font-family:'Baloo 2',sans-serif;font-size:27px;font-weight:700;}
+.weather-strip .wdesc{font-size:12px;opacity:.94;}
+.weather-strip .wloc{font-size:11px;opacity:.82;margin-top:2px;}
+.weather-strip .wicon{font-size:31px;}
+.weather-strip .arrow{font-size:12.5px;opacity:.88;}
+
+/* ---------- Card grid ---------- */
+.grid-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:15px 14px;box-shadow:var(--shadow);text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:9px;min-height:112px;transition:transform .12s ease,box-shadow .12s ease;}
+.card:active{transform:scale(.96);box-shadow:var(--shadow-lift);}
+.card-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.5);}
+.card h3{font-family:'Baloo 2',sans-serif;font-size:13.5px;margin:0;font-weight:700;line-height:1.28;}
+.card p{font-size:11px;color:var(--soil-soft);margin:0;line-height:1.3;}
+.ic-leaf{background:linear-gradient(135deg,#DCEEDF,#BFE0C7);}
+.ic-sky{background:linear-gradient(135deg,#DCEBF1,#BFDCE7);}
+.ic-turmeric{background:linear-gradient(135deg,#F8E3B8,#F0CE86);}
+.ic-clay{background:linear-gradient(135deg,#F1D6CB,#E6B7A4);}
+
+/* ---------- Forms ---------- */
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:12.5px;font-weight:700;margin-bottom:6px;color:var(--soil);}
+.field select,.field input[type=text],.field input[type=number]{width:100%;padding:12px 13px;border-radius:13px;border:1.5px solid var(--line);background:var(--card);font-size:14px;color:var(--soil);font-family:inherit;}
+.field select:focus,.field input:focus{outline:2.5px solid var(--indigo);outline-offset:1px;}
+.chip-row{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{padding:8px 14px;border-radius:100px;border:1.5px solid var(--line);background:var(--card);font-size:12.5px;cursor:pointer;color:var(--soil-soft);font-weight:700;transition:transform .1s ease;}
+.chip:active{transform:scale(.94);}
+.chip.active{background:linear-gradient(135deg,var(--leaf),var(--leaf-deep));border-color:var(--leaf-deep);color:#fff;}
+.btn{width:100%;padding:15px;border-radius:15px;border:none;font-size:15px;font-weight:800;font-family:'Baloo 2',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .1s ease;}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:linear-gradient(135deg,var(--leaf),var(--leaf-deep));color:#fff;box-shadow:0 8px 18px rgba(41,92,61,.32);}
+.btn-secondary{background:var(--card);color:var(--soil);border:1.5px solid var(--line);}
+.btn:disabled{opacity:.55;}
+
+/* ---------- Upload / camera ---------- */
+.upload-box{border:2px dashed var(--turmeric);border-radius:var(--radius);background:linear-gradient(180deg,var(--card),var(--wheat-deep));padding:24px 16px;text-align:center;cursor:pointer;margin-bottom:14px;transition:transform .12s ease;}
+.upload-box:active{transform:scale(.98);}
+.upload-box .up-icon{font-size:32px;margin-bottom:7px;}
+.upload-box p{margin:0;font-size:13px;color:var(--soil-soft);}
+.upload-box strong{display:block;font-size:14.5px;margin-bottom:3px;color:var(--soil);font-family:'Baloo 2',sans-serif;}
+.preview-wrap{position:relative;border-radius:var(--radius);overflow:hidden;margin-bottom:14px;box-shadow:var(--shadow-lift);}
+.preview-wrap img{width:100%;display:block;max-height:280px;object-fit:cover;}
+.preview-wrap .clear-x{position:absolute;top:9px;right:9px;width:32px;height:32px;border-radius:50%;background:rgba(23,41,67,.7);color:#fff;border:none;font-size:16px;cursor:pointer;}
+
+/* ---------- Result card ---------- */
+.result-card{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--turmeric);border-radius:var(--radius);padding:17px;box-shadow:var(--shadow);margin-top:8px;font-size:14px;line-height:1.65;}
+#view-scan .result-card{border-left-color:var(--clay);}
+#view-weather .result-card{border-left-color:var(--sky);}
+#view-irrigation .result-card{border-left-color:var(--sky);}
+#view-fertilizer .result-card{border-left-color:var(--leaf);}
+#view-prices .result-card{border-left-color:var(--turmeric);}
+#view-buyers .result-card{border-left-color:var(--leaf);}
+.result-card h4{margin:0 0 9px;font-family:'Baloo 2',sans-serif;font-size:15px;display:flex;align-items:center;gap:7px;}
+.result-card ul{margin:6px 0;padding-left:20px;}
+.result-card li{margin-bottom:4px;}
+.result-card .disclaimer{margin-top:12px;padding-top:11px;border-top:1px dashed var(--line);font-size:11.5px;color:var(--soil-soft);}
+.loading{display:flex;align-items:center;gap:10px;padding:17px;color:var(--soil-soft);font-size:13.5px;}
+.spinner{width:20px;height:20px;border:3px solid var(--line);border-top-color:var(--turmeric);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ---------- Schemes ---------- */
+.search-box{display:flex;align-items:center;gap:8px;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px;}
+.search-box input{border:none;background:transparent;flex:1;font-size:14px;font-family:inherit;color:var(--soil);}
+.search-box input:focus{outline:none;}
+.scheme-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:15px 16px;margin-bottom:11px;box-shadow:var(--shadow);}
+.scheme-card .tag{display:inline-block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;background:var(--wheat-deep);color:var(--turmeric-deep);padding:4px 10px;border-radius:100px;margin-bottom:8px;}
+.scheme-card h4{margin:0 0 5px;font-family:'Baloo 2',sans-serif;font-size:15px;}
+.scheme-card p{margin:0 0 6px;font-size:13px;color:var(--soil-soft);line-height:1.5;}
+.scheme-card .meta-row{font-size:12px;color:var(--soil);margin-top:6px;}
+.scheme-card .meta-row b{color:var(--leaf-deep);}
+.scheme-card a{color:var(--sky-deep);font-weight:700;font-size:12.5px;text-decoration:none;}
+.installment-box{background:var(--wheat-deep);border:1px solid #E7D8AE;border-radius:12px;padding:10px 12px;font-size:12px;color:var(--soil);line-height:1.5;margin:9px 0 10px;}
+
+/* ---------- Voice / Mitra AI Agent ---------- */
+.mitra-hero{text-align:center;padding:20px 10px 6px;}
+.mitra-hero .avatar{width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,var(--turmeric),var(--clay));display:flex;align-items:center;justify-content:center;font-size:33px;margin:0 auto 10px;box-shadow:var(--shadow-lift);}
+.chat-thread{display:flex;flex-direction:column;gap:11px;margin:8px 0 12px;min-height:120px;}
+.chat-row{display:flex;gap:8px;align-items:flex-end;}
+.chat-row.user{flex-direction:row-reverse;}
+.chat-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--turmeric),var(--clay));display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.18);}
+.chat-bubble{max-width:80%;padding:11px 14px;border-radius:17px;font-size:13.5px;line-height:1.55;}
+.chat-bubble.user{background:linear-gradient(135deg,var(--indigo),var(--indigo-deep));color:#fff;border-bottom-right-radius:4px;}
+.chat-bubble.agent{background:var(--card);border:1px solid var(--line);border-bottom-left-radius:4px;box-shadow:var(--shadow);}
+.chat-bubble p{margin:0 0 6px;}
+.chat-bubble p:last-child{margin-bottom:0;}
+.chat-bubble ul{margin:6px 0;padding-left:18px;}
+.chat-bubble img{max-width:100%;border-radius:11px;margin-top:6px;display:block;}
+.chat-bubble.agent .spinner{border-color:var(--line);border-top-color:var(--turmeric);}
+.chat-input-row{display:flex;align-items:center;gap:6px;background:var(--card);border:1.5px solid var(--line);border-radius:100px;padding:6px 6px 6px 11px;position:sticky;bottom:82px;box-shadow:var(--shadow-lift);z-index:10;}
+.chat-input-row input[type=text]{flex:1;border:none;background:transparent;font-size:14px;font-family:inherit;padding:8px 4px;color:var(--soil);min-width:0;}
+.chat-input-row input[type=text]:focus{outline:none;}
+.chat-icon-btn{width:36px;height:36px;border-radius:50%;border:none;background:var(--wheat-deep);font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform .1s ease;}
+.chat-icon-btn:active{transform:scale(.9);}
+.chat-icon-btn.listening{background:linear-gradient(135deg,var(--clay),var(--clay-deep));color:#fff;animation:pulse 1.2s ease-in-out infinite;}
+.chat-send-btn{width:36px;height:36px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--leaf),var(--leaf-deep));color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform .1s ease;}
+.chat-send-btn:active{transform:scale(.88);}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(174,75,48,.45);}70%{box-shadow:0 0 0 22px rgba(174,75,48,0);}100%{box-shadow:0 0 0 0 rgba(174,75,48,0);}}
+.mic-hint{text-align:center;font-size:12.5px;color:var(--soil-soft);margin-bottom:14px;}
+.transcript-box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:13.5px;color:var(--soil-soft);margin-bottom:10px;min-height:20px;}
+
+/* ---------- Bottom nav ---------- */
+.bottomnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:10px 6px calc(10px + env(safe-area-inset-bottom));z-index:30;box-shadow:0 -6px 18px rgba(42,32,20,.08);}
+.navbtn{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;font-weight:700;color:var(--soil-soft);cursor:pointer;padding:5px 12px;border-radius:14px;transition:background .15s ease,color .15s ease;}
+.navbtn .navicon{font-size:19px;}
+.navbtn.active{color:var(--turmeric-deep);background:var(--wheat-deep);}
+
+/* ---------- misc ---------- */
+.section-label{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--soil-soft);margin:20px 0 10px 2px;}
+.note-box{background:linear-gradient(135deg,#F8E3B8,#F0D699);border:1px solid #E0B968;border-radius:13px;padding:11px 14px;font-size:12px;color:#5F3E0C;margin-bottom:14px;line-height:1.5;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}
+}
+</style>
+</head>
+<body>
+<div id="app">
+<div class="topbar">
+<div class="brand">
+<div class="brand-mark">🌾</div>
+<div class="brand-text">
+<h1 class="display">AI Kisan</h1>
+<small>किसान का डिजिटल साथी</small>
+</div>
+</div>
+<div class="free-badge">100% मुफ़्त • Free</div>
+</div>
+<div class="kantha"></div>
+
+<!-- ================= HOME ================= -->
+<main class="view active" id="view-home">
+<div class="hero">
+<div class="wheel-wrap">
+<div class="wheel"></div>
+<div class="wheel-marker" id="wheelMarker"></div>
+<div class="wheel-center" id="wheelCenter">🌱</div>
+</div>
+<div class="hero-text">
+<div class="season-label" id="seasonLabel">सीज़न</div>
+<h2 id="seasonMonth">—</h2>
+<p id="seasonHint">आपके मौसम चक्र के अनुसार खेती की सलाह।</p>
+</div>
+</div>
+
+<div class="weather-strip" onclick="goto('weather')">
+<div>
+<div class="wtemp" id="homeTemp">—°</div>
+<div class="wdesc" id="homeDesc">मौसम लोड हो रहा है…</div>
+<div class="wloc" id="homeLoc">स्थान का पता लगाया जा रहा है…</div>
+</div>
+<div style="text-align:right;">
+<div class="wicon" id="homeIcon">⛅</div>
+<div class="arrow">पूरा पूर्वानुमान ›</div>
+</div>
+</div>
+
+<div class="section-label">सभी सुविधाएँ · All Features</div>
+<div class="grid-cards">
+<button class="card" onclick="goto('scan')">
+<div class="card-icon ic-clay">📷</div>
+<h3>फसल स्कैन<br><span style="font-weight:500;font-size:11px;">Disease &amp; Pest Scan</span></h3>
+<p>फोटो से रोग व कीट पहचानें</p>
+</button>
+<button class="card" onclick="goto('weather')">
+<div class="card-icon ic-sky">🌦️</div>
+<h3>मौसम चेतावनी<br><span style="font-weight:500;font-size:11px;">Weather Alerts</span></h3>
+<p>7 दिन का पूर्वानुमान</p>
+</button>
+<button class="card" onclick="goto('irrigation')">
+<div class="card-icon ic-sky">💧</div>
+<h3>सिंचाई सलाह<br><span style="font-weight:500;font-size:11px;">Irrigation Advice</span></h3>
+<p>कब और कितना पानी दें</p>
+</button>
+<button class="card" onclick="goto('fertilizer')">
+<div class="card-icon ic-leaf">🌱</div>
+<h3>उर्वरक सलाह<br><span style="font-weight:500;font-size:11px;">Fertilizer Guide</span></h3>
+<p>सही खाद व मात्रा जानें</p>
+</button>
+<button class="card" onclick="goto('schemes')">
+<div class="card-icon ic-turmeric">🏛️</div>
+<h3>सरकारी योजना<br><span style="font-weight:500;font-size:11px;">Govt Schemes</span></h3>
+<p>PM-KISAN, KCC और अधिक</p>
+</button>
+<button class="card" onclick="goto('prices')">
+<div class="card-icon ic-turmeric">📈</div>
+<h3>फसल भाव<br><span style="font-weight:500;font-size:11px;">Crop Prices</span></h3>
+<p>मंडी भाव व अनुमान</p>
+</button>
+<button class="card" onclick="goto('buyers')">
+<div class="card-icon ic-leaf">🤝</div>
+<h3>खरीदार खोजें<br><span style="font-weight:500;font-size:11px;">Nearby Buyers</span></h3>
+<p>eNAM व मंडी लिंक</p>
+</button>
+<button class="card" onclick="goto('voice')">
+<div class="card-icon ic-clay">🤖</div>
+<h3>AI एजेंट<br><span style="font-weight:500;font-size:11px;">AI Agent</span></h3>
+<p>लिखें, बोलें या फोटो भेजें</p>
+</button>
+</div>
+</main>
+
+<!-- ================= SCAN (Disease + Pest) ================= -->
+<main class="view" id="view-scan">
+<div class="panel-header">
+<button class="back-btn" onclick="goto('home')">‹</button>
+<div><div class="panel-title">फसल स्कैन · Crop Scan</div><div class="panel-sub">रोग और कीट दोनों की जाँच एक फोटो में</div></div>
+</div>
+<div class="field">
+<label>जवाब की भाषा · Response language</label>
+<select id="scanLang">
+<option value="Hindi">हिंदी (Hindi)</option>
+<option value="English">English</option>
+<option value="Marathi">मराठी (Marathi)</option>
+<option value="Punjabi">ਪੰਜਾਬੀ (Punjabi)</option>
+<option value="Gujarati">ગુજરાતી (Gujarati)</option>
+<option value="Bengali">বাংলা (Bengali)</option>
+<option value="Tamil">தமிழ் (Tamil)</option>
+<option value="Telugu">తెలుగు (Telugu)</option>
+<option value="Kannada">ಕನ್ನಡ (Kannada)</option>
+</select>
+</div>
+<div id="uploadZone">
+<div class="upload-box" onclick="document.getElementById('scanFileInput').click()">
+<div class="up-icon">🌿</div>
+<strong>फोटो लें या चुनें</strong>
+<p>पत्ती, तना या फल की साफ़ फोटो लें — Take a clear photo of the affected leaf, stem or fruit</p>
+</div>
+</div>
+<input type="file" id="scanFileInput" accept="image/*" capture="environment" style="display:none">
+<div id="scanPreviewWrap"></div>
+<button class="btn btn-primary" id="scanAnalyzeBtn" style="display:none;" onclick="analyzeCrop()">🔍 जाँच करें · Analyze</button>
+<div id="scanResult"></div>
+</main>
+
+<!-- ================= WEATHER ================= -->
+<main class="view" id="view-weather">
+<div class="panel-header">
+<button class="back-btn" onclick="goto('home')">‹</button>
+<div><div class="panel-title">मौसम चेतावनी · Weather</div><div class="panel-sub">आपके स्थान के आधार पर</div></div>
+</div>
+<div id="weatherDetail"><div class="loading"><div class="spinner"></div>मौसम की जानकारी लाई जा रही है…</div></div>
+</main>
+
+<!-- ================= IRRIGATION ================= -->
+<main class="view" id="view-irrigation">
+<div class="panel-header">
+<button class="back-btn" onclick="goto('home')">‹</button>
+<div><div class="panel-title">सिंचाई सलाह · Irrigation</div><div class="panel-sub">मौसम पूर्वानुमान के साथ जोड़कर सलाह</div></div>
+</div>
+<div class="field">
+<label>फसल · Crop</label>
+<input type="text" id="irrCrop" placeholder="जैसे: गेहूं, धान, कपास, गन्ना">
+</div>
+<div class="two-col">
+<div class="field">
+<label>मिट्टी का प्रकार · Soil</label>
+<select id="irrSoil"><option>दोमट (Loamy)</option><option>चिकनी (Clay)</option><option>रेतीली (Sandy)</option><option>काली मिट्टी (Black soil)</option><option>पता नहीं</option></select>
+</div>
+<div class="field">
+<label>वृद्धि अवस्था · Growth stage</label>
+<select id="irrStage"><option>बुवाई (Sowing)</option><option>अंकुरण (Germination)</option><option>वानस्पतिक (Vegetative)</option><option>फूल आना (Flowering)</option><option>फल/दाना भरना (Fruiting/Grain fill)</option><option>कटाई से पहले (Pre-harvest)</option></select>
+</div>
+</div>
+<div class="two-col">
+<div class="field">
+<label>पिछली सिंचाई कब · Last watered</label>
+<select id="irrLast"><option>आज (Today)</option><option>2-3 दिन पहले</option><option>4-6 दिन पहले</option><option>1 सप्ताह+</option><option>2 सप्ताह+</option></select>
+</div>
+<div class="field">
+<label>खेत का आकार · Land size</label>
+<input type="text" id="irrLand" placeholder="जैसे: 2 एकड़">
+</div>
+</div>
+<div class="field">
+<label>जवाब की भाषा · Language</label>
+<select id="irrLang"><option value="Hindi">हिंदी</option><option value="English">English</option><option value="Marathi">मराठी</option><option value="Punjabi">ਪੰਜਾਬੀ</option><option value="Gujarati">ગુજરાતી</option><option value="Bengali">বাংলা</option><option value="Tamil">தமிழ்</option><option value="Telugu">తెలుగు</option><option value="Kannada">ಕನ್ನಡ</option></select>
+</div>
+<button class="btn btn-primary" onclick="getIrrigationAdvice()">💧 सलाह पाएँ · Get Advice</button>
+<div id="irrResult"></div>
+</main>
+
+<!-- ================= FERTILIZER ================= -->
+<main class="view" id="view-fertilizer">
+<div class="panel-header">
+<button class="back-btn" onclick="goto('home')">‹</button>
+<div><div class="panel-title">उर्वरक सलाह · Fertilizer</div><div class="panel-sub">फसल व अवस्था अनुसार सुझाव</div></div>
+</div>
+<div class="field">
+<label>फसल · Crop</label>
+<input type="text" id="fertCrop" placeholder="जैसे: गेहूं, धान, टमाटर, आलू">
+</div>
+<div class="two-col">
+<div class="field">
+<label>वृद्धि अवस्था · Growth stage</label>
+<select id="fertStage"><option>बुवाई पूर्व (Basal/pre-sowing)</option><option>अंकुरण (Early growth)</option><option>वानस्पतिक (Vegetative)</option><option>फूल/फल आना (Flowering/fruiting)</option></select>
+</div>
+<div class="field">
+<label>मिट्टी का प्रकार · Soil</label>
+<select id="fertSoil"><option>दोमट (Loamy)</option><option>चिकनी (Clay)</option><option>रेतीली (Sandy)</option><option>काली मिट्टी (Black soil)</option><option>पता नहीं</option></select>
+</div>
+</div>
+<div class="two-col">
+<div class="field">
+<label>खेत का आकार · Land size</label>
+<input type="text" id="fertLand" placeholder="जैसे: 1 एकड़">
+</div>
+<div class="field">
+<label>पसंद · Preference</label>
+<select id="fertPref"><option>जैविक + रासायनिक (Both)</option><option>केवल जैविक (Organic only)</option><option>केवल रासायनिक (Chemical only)</option></select>
+</div>
+</div>
+<div class="field">
+<label>जवाब की भाषा · Language</label>
+<select id="fertLang"><option value="Hindi">हिंदी</option><option value="English">English</option><option value="Marathi">मराठी</option><option value="Punjabi">ਪੰਜਾਬੀ</option><option value="Gujarati">ગુજરાતી</option><option value="Bengali">বাংলা</option><option value="Tamil">தமிழ்</option><option value="Telugu">తెలుగు</option><option value="Kannada">ಕನ್ನಡ</option></select>
+</div>
+<button class="btn btn-primary" onclick="getFertilizerAdvice()">🌱 सलाह पाएँ · Get Advice</button>
+<div id="fertResult"></div>
+</main>
+
+<!-- ================= SCHEMES ================= -->
+<main class="view" id="view-schemes">
+<div class="panel-header">
+<button class="back-btn" onclick="goto('home')">‹</button>
+<div><div class="panel-title">सरकारी योजनाएँ · Schemes</div><div class="panel-sub">केंद्र सरकार की प्रमुख कृषि योजनाएँ</div></div>
+</div>
+<div class="search-box">
+<span>🔎</span>
+<input type="text" id="schemeSearch" placeholder="योजना खोजें… search schemes" oninput="renderSchemes()">
+</div>
+<div class="chip-row" id="schemeChips" style="margin-bottom:12px;"></div>
+<div id="schemeList"></div>
+</main>
+
+<!-- ================= PRICES ================= -->
+<main class="view" id="view-prices">
+<div class="panel-header">
+<button class="back-btn" onclick="goto('home')">‹</button>
+<div><div class="panel-title">फसल भाव · Crop Prices</div><div class="panel-sub">मंडी भाव जानकारी</div></div>
+</div>
+<div class="field">
+<label>फसल · Crop</label>
+<input type="text" id="priceCrop" placeholder="जैसे: गेहूं, प्याज, टमाटर">
+</div>
+<div class="two-col">
+<div class="field">
+<label>राज्य · State</label>
+<input type="text" id="priceState" placeholder="जैसे: उत्तर प्रदेश">
+</div>
+<div class="field">
+<label>मंडी (वैकल्पिक) · Mandi</label>
+<input type="text" id="priceMandi" placeholder="जैसे: सहारनपुर">
+</div>
+</div>
+<button class="btn btn-primary" onclick="getCropPrice()">📈 भाव देखें · Check Price</button>
+<div id="priceResult"></div>
+</main>
+
+<!-- ================= BUYERS ================= -->
+<main class="view" id="view-buyers">
+<div class="panel-header">
+<button class="back-btn" onclick="goto('home')">‹</button>
+<div><div class="panel-title">खरीदार खोजें · Nearby Buyers</div><div class="panel-sub">आधिकारिक मंडी व eNAM लिंक</div></div>
+</div>
+<div class="note-box">हम फ़र्ज़ी व्यापारी संपर्क नहीं दिखाते — केवल सरकारी eNAM/मंडी चैनल, ताकि आप सुरक्षित रहें।<br>We only surface official eNAM/mandi channels, not unverified trader contacts, to keep you safe from fraud.</div>
+<div class="field">
+<label>फसल (वैकल्पिक) · Crop</label>
+<input type="text" id="buyerCrop" placeholder="जैसे: गेहूं, आलू">
+</div>
+<button class="btn btn-secondary" onclick="detectLocation()" style="margin-bottom:10px;">📍 मेरा स्थान पता करें · Detect my location</button>
+<div id="buyerLoc"></div>
+<button class="btn btn-primary" onclick="getBuyerTips()">🤝 बिक्री सलाह पाएँ · Get Selling Tips</button>
+<div id="buyerResult"></div>
+</main>
+
+<!-- ================= AI AGENT ================= -->
+<main class="view" id="view-voice">
+<div class="panel-header">
+<button class="back-btn" onclick="goto('home')">‹</button>
+<div><div class="panel-title">AI एजेंट · Kisan AI Agent</div><div class="panel-sub">लिखें, बोलें या फोटो भेजें — सब कुछ याद रखता है</div></div>
+</div>
+<div class="field">
+<label>भाषा चुनें · Choose language</label>
+<select id="voiceLang">
+<option value="hi-IN|Hindi">हिंदी (Hindi)</option>
+<option value="en-IN|English">English</option>
+<option value="mr-IN|Marathi">मराठी (Marathi)</option>
+<option value="pa-IN|Punjabi">ਪੰਜਾਬੀ (Punjabi)</option>
+<option value="gu-IN|Gujarati">ગુજરાતી (Gujarati)</option>
+<option value="bn-IN|Bengali">বাংলা (Bengali)</option>
+<option value="ta-IN|Tamil">தமிழ் (Tamil)</option>
+<option value="te-IN|Telugu">తెలుగు (Telugu)</option>
+<option value="kn-IN|Kannada">ಕನ್ನಡ (Kannada)</option>
+</select>
+</div>
+<div class="chat-thread" id="chatThread"></div>
+<div class="chat-input-row">
+<button class="chat-icon-btn" onclick="document.getElementById('agentFileInput').click()" title="फोटो भेजें">📷</button>
+<input type="file" id="agentFileInput" accept="image/*" capture="environment" style="display:none">
+<input type="text" id="chatTextInput" placeholder="यहाँ लिखें… type your question" onkeypress="if(event.key==='Enter') sendAgentText()">
+<button class="chat-icon-btn" id="micBtn" onclick="toggleListening()" title="बोलकर पूछें">🎙️</button>
+<button class="chat-send-btn" onclick="sendAgentText()">➤</button>
+</div>
+<div class="mic-hint" id="micHint">लिखें, माइक दबाएँ, या 📷 से फोटो भेजें</div>
+</main>
+
+<nav class="bottomnav">
+<button class="navbtn active" data-nav="home" onclick="goto('home')"><span class="navicon">🏠</span>Home</button>
+<button class="navbtn" data-nav="scan" onclick="goto('scan')"><span class="navicon">📷</span>Scan</button>
+<button class="navbtn" data-nav="schemes" onclick="goto('schemes')"><span class="navicon">🏛️</span>Schemes</button>
+<button class="navbtn" data-nav="voice" onclick="goto('voice')"><span class="navicon">🤖</span>Agent</button>
+</nav>
+</div>
+
+<script>
+/* =========================================================
+   NAVIGATION
+========================================================= */
+const NAV_TABS = ['home','scan','schemes','voice'];
+function goto(view){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  document.querySelectorAll('.navbtn').forEach(b=>b.classList.remove('active'));
+  if(NAV_TABS.includes(view)){
+    const btn = document.querySelector('.navbtn[data-nav="'+view+'"]');
+    if(btn) btn.classList.add('active');
+  }
+  window.scrollTo(0,0);
+}
+
+/* =========================================================
+   FORMAT AI TEXT -> SIMPLE HTML
+========================================================= */
+function formatAI(text){
+  if(!text) return '';
+  let esc = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  esc = esc.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+  const lines = esc.split(/\n+/);
+  let html = ''; let inList = false;
+  lines.forEach(line=>{
+    const t = line.trim();
+    if(!t) return;
+    if(/^[-•]\s+/.test(t)){
+      if(!inList){ html += '<ul>'; inList = true; }
+      html += '<li>'+t.replace(/^[-•]\s+/,'')+'</li>';
+    } else {
+      if(inList){ html += '</ul>'; inList = false; }
+      html += '<p>'+t+'</p>';
+    }
+  });
+  if(inList) html += '</ul>';
+  return html;
+}
+function showLoading(el, msg){ el.innerHTML = '<div class="loading"><div class="spinner"></div>'+msg+'</div>'; }
+function showError(el, msg){ el.innerHTML = '<div class="result-card"><h4>⚠️ समस्या हुई</h4><p>'+msg+'</p></div>'; }
+
+/* =========================================================
+   SEASON WHEEL (Kharif / Rabi / Zaid)
+========================================================= */
+function initSeasonWheel(){
+  const now = new Date();
+  const m = now.getMonth(); // 0=Jan
+  const seasons = ['Rabi','Rabi','Rabi','Zaid','Zaid','Kharif','Kharif','Kharif','Kharif','Kharif','Rabi','Rabi'];
+  const seasonNamesHi = {Rabi:'रबी सीज़न',Kharif:'ख़रीफ़ सीज़न',Zaid:'ज़ायद सीज़न'};
+  const hints = {
+    Rabi:'गेहूं, सरसों, चना जैसी रबी फसलों का समय — बुवाई/वृद्धि पर ध्यान दें।',
+    Kharif:'धान, कपास, मक्का जैसी ख़रीफ़ फसलों का मानसून सीज़न चल रहा है।',
+    Zaid:'गर्मी की छोटी फसलें (तरबूज़, ककड़ी, मूंग) व सिंचाई प्रबंधन का समय।'
+  };
+  const season = seasons[m];
+  document.getElementById('seasonLabel').textContent = seasonNamesHi[season];
+  const monthNames = ['जनवरी','फ़रवरी','मार्च','अप्रैल','मई','जून','जुलाई','अगस्त','सितंबर','अक्टूबर','नवंबर','दिसंबर'];
+  document.getElementById('seasonMonth').textContent = monthNames[m];
+  document.getElementById('seasonHint').textContent = hints[season];
+  document.getElementById('wheelCenter').textContent = season==='Kharif'?'🌧️':season==='Rabi'?'🌾':'☀️';
+  const angleDeg = (m*30 + 15) - 90; // -90 to start measuring from top(0deg=top)
+  const rad = angleDeg * Math.PI/180;
+  const R = 39;
+  const x = 46 + R*Math.cos(rad);
+  const y = 46 + R*Math.sin(rad);
+  const marker = document.getElementById('wheelMarker');
+  marker.style.left = x+'px';
+  marker.style.top = y+'px';
+}
+initSeasonWheel();
+
+/* =========================================================
+   LOCATION helper
+========================================================= */
+let userCoords = null;
+function fetchLocation(){
+  return new Promise((resolve)=>{
+    if(userCoords){ resolve(userCoords); return; }
+    if(!navigator.geolocation){ resolve(null); return; }
+    navigator.geolocation.getCurrentPosition(
+      pos=>{ userCoords = {lat:pos.coords.latitude, lon:pos.coords.longitude}; resolve(userCoords); },
+      ()=> resolve(null),
+      {timeout:8000}
+    );
+  });
+}
+async function reverseGeocode(lat,lon){
+  try{
+    const r = await fetch(`https://geocoding-api.open-meteo.com/v1/reverse?latitude=${lat}&longitude=${lon}&language=en`);
+    const d = await r.json();
+    if(d && d.results && d.results.length){
+      const p = d.results[0];
+      return [p.name, p.admin1, p.country].filter(Boolean).join(', ');
+    }
+  }catch(e){}
+  return null;
+}
+
+/* =========================================================
+   WEATHER (Open-Meteo, free, no key)
+========================================================= */
+const WMO = {
+  0:['साफ़ आसमान','☀️'],1:['मुख्यतः साफ़','🌤️'],2:['आंशिक बादल','⛅'],3:['बादल छाए','☁️'],
+  45:['कोहरा','🌫️'],48:['कोहरा','🌫️'],
+  51:['हल्की बूंदाबांदी','🌦️'],53:['बूंदाबांदी','🌦️'],55:['घनी बूंदाबांदी','🌦️'],
+  61:['हल्की बारिश','🌧️'],63:['बारिश','🌧️'],65:['भारी बारिश','🌧️'],
+  71:['हल्की बर्फ़','🌨️'],73:['बर्फ़','🌨️'],75:['भारी बर्फ़','🌨️'],
+  80:['बौछारें','🌦️'],81:['तेज़ बौछारें','🌦️'],82:['बहुत तेज़ बौछारें','⛈️'],
+  95:['आंधी-तूफ़ान','⛈️'],96:['ओलों के साथ तूफ़ान','⛈️'],99:['भारी ओलावृष्टि','⛈️']
+};
+function wmoDesc(code){ return WMO[code] || ['मौसम अपडेट','🌡️']; }
+async function loadWeather(){
+  const coords = await fetchLocation();
+  if(!coords){
+    document.getElementById('homeDesc').textContent = 'स्थान अनुमति दें ताकि मौसम दिखे';
+    document.getElementById('homeLoc').textContent = 'Enable location for weather';
+    document.getElementById('weatherDetail').innerHTML = '<div class="note-box">कृपया ब्राउज़र में लोकेशन अनुमति चालू करें और पेज को फिर से लोड करें।<br>Please allow location access and reload.</div>';
+    return;
+  }
+  try{
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&current=temperature_2m,precipitation,weather_code,wind_speed_10m,relative_humidity_2m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum&timezone=auto&forecast_days=7`;
+    const r = await fetch(url);
+    const d = await r.json();
+    const [descNow, iconNow] = wmoDesc(d.current.weather_code);
+    document.getElementById('homeTemp').textContent = Math.round(d.current.temperature_2m)+'°C';
+    document.getElementById('homeDesc').textContent = descNow;
+    document.getElementById('homeIcon').textContent = iconNow;
+    const place = await reverseGeocode(coords.lat, coords.lon);
+    document.getElementById('homeLoc').textContent = place || 'आपका क्षेत्र';
+    renderWeatherDetail(d, place);
+  }catch(e){
+    document.getElementById('homeDesc').textContent = 'मौसम लोड नहीं हो सका';
+  }
+}
+function renderWeatherDetail(d, place){
+  const rainSoon = d.daily.precipitation_probability_max.slice(0,3).some(p=>p>=50);
+  let html = '';
+  if(rainSoon){
+    html += '<div class="note-box">🌧️ अगले 3 दिनों में बारिश की संभावना है — सिंचाई व छिड़काव की योजना उसी अनुसार बनाएं।<br>Rain likely in next 3 days — plan irrigation and spraying accordingly.</div>';
+  }
+  html += '<div class="result-card"><h4>📍 '+(place||'आपका क्षेत्र')+'</h4>';
+  for(let i=0;i<d.daily.time.length;i++){
+    const [desc,icon] = wmoDesc(d.daily.weather_code[i]);
+    const day = new Date(d.daily.time[i]).toLocaleDateString('hi-IN',{weekday:'short',day:'numeric',month:'short'});
+    html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);">
+      <div style="font-size:13px;flex:1;">${day}</div>
+      <div style="font-size:20px;flex:0 0 34px;text-align:center;">${icon}</div>
+      <div style="font-size:12px;color:var(--soil-soft);flex:1;text-align:center;">${desc}</div>
+      <div style="font-size:13px;font-weight:700;flex:0 0 70px;text-align:right;">${Math.round(d.daily.temperature_2m_max[i])}°/${Math.round(d.daily.temperature_2m_min[i])}°</div>
+    </div>`;
+  }
+  html += '<div class="disclaimer">डेटा स्रोत: Open-Meteo (निःशुल्क मौसम सेवा)</div></div>';
+  document.getElementById('weatherDetail').innerHTML = html;
+}
+loadWeather();
+
+/* =========================================================
+   API HELPERS (Groq via serverless proxy)
+========================================================= */
+async function callChatAPI(mode, payload){
+  const r = await fetch('/api/chat', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({mode, payload})
+  });
+  if(!r.ok) throw new Error('server_error');
+  const d = await r.json();
+  return d.reply;
+}
+async function callVisionAPI(imageDataUrl, lang){
+  const r = await fetch('/api/vision', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({image: imageDataUrl, lang})
+  });
+  if(!r.ok) throw new Error('server_error');
+  const d = await r.json();
+  return d.reply;
+}
+
+/* =========================================================
+   SHARED: resize an image file to a compressed base64 data URL
+========================================================= */
+function resizeImageFileToDataURL(file, maxW, quality){
+  maxW = maxW || 1024; quality = quality || 0.82;
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      const img = new Image();
+      img.onload = function(){
+        const canvas = document.createElement('canvas');
+        const scale = Math.min(1, maxW/img.width);
+        canvas.width = img.width*scale;
+        canvas.height = img.height*scale;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = ev.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+/* =========================================================
+   SCAN (Disease + Pest via image)
+========================================================= */
+let scanImageData = null;
+document.getElementById('scanFileInput').addEventListener('change', async function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  scanImageData = await resizeImageFileToDataURL(file);
+  document.getElementById('scanPreviewWrap').innerHTML =
+    '<div class="preview-wrap"><img src="'+scanImageData+'"><button class="clear-x" onclick="clearScan()">✕</button></div>';
+  document.getElementById('uploadZone').style.display = 'none';
+  document.getElementById('scanAnalyzeBtn').style.display = 'flex';
+  document.getElementById('scanResult').innerHTML = '';
+});
+function clearScan(){
+  scanImageData = null;
+  document.getElementById('scanPreviewWrap').innerHTML = '';
+  document.getElementById('uploadZone').style.display = 'block';
+  document.getElementById('scanAnalyzeBtn').style.display = 'none';
+  document.getElementById('scanFileInput').value = '';
+}
+async function analyzeCrop(){
+  if(!scanImageData) return;
+  const resultEl = document.getElementById('scanResult');
+  const lang = document.getElementById('scanLang').value;
+  showLoading(resultEl, 'AI आपकी फसल की फोटो जाँच रहा है… (10-20 सेकंड)');
+  try{
+    const reply = await callVisionAPI(scanImageData, lang);
+    resultEl.innerHTML = '<div class="result-card"><h4>🔍 जाँच परिणाम · Scan Result</h4>'+formatAI(reply)+
+      '<div class="disclaimer">⚠️ यह AI अनुमान है, नुस्खा नहीं। कोई भी दवा/रसायन डालने से पहले पैकेट के लेबल के निर्देश ज़रूर पढ़ें, दस्ताने व मास्क पहनें, और गंभीर स्थिति में नज़दीकी कृषि विज्ञान केंद्र (KVK) या कृषि अधिकारी से पुष्टि करें।</div></div>';
+  }catch(e){
+    showError(resultEl, 'फोटो जाँच नहीं हो सकी। कृपया दोबारा कोशिश करें या इंटरनेट जाँचें।');
+  }
+}
+
+/* =========================================================
+   IRRIGATION
+========================================================= */
+async function getIrrigationAdvice(){
+  const el = document.getElementById('irrResult');
+  const crop = document.getElementById('irrCrop').value.trim();
+  if(!crop){ alert('कृपया फसल का नाम लिखें'); return; }
+  showLoading(el, 'सिंचाई सलाह तैयार की जा रही है…');
+  let weatherNote = 'not available';
+  try{
+    const coords = await fetchLocation();
+    if(coords){
+      const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&daily=precipitation_probability_max,precipitation_sum&forecast_days=5&timezone=auto`);
+      const d = await r.json();
+      weatherNote = 'Next 5 days rain probability: ' + d.daily.precipitation_probability_max.join('%, ') + '%';
+    }
+  }catch(e){}
+  try{
+    const reply = await callChatAPI('irrigation', {
+      crop, soil: document.getElementById('irrSoil').value, stage: document.getElementById('irrStage').value,
+      lastWatered: document.getElementById('irrLast').value, land: document.getElementById('irrLand').value || 'unspecified',
+      lang: document.getElementById('irrLang').value, weatherNote
+    });
+    el.innerHTML = '<div class="result-card"><h4>💧 सिंचाई योजना · Irrigation Plan</h4>'+formatAI(reply)+'</div>';
+  }catch(e){ showError(el,'सलाह लोड नहीं हुई। दोबारा कोशिश करें।'); }
+}
+
+/* =========================================================
+   FERTILIZER
+========================================================= */
+async function getFertilizerAdvice(){
+  const el = document.getElementById('fertResult');
+  const crop = document.getElementById('fertCrop').value.trim();
+  if(!crop){ alert('कृपया फसल का नाम लिखें'); return; }
+  showLoading(el, 'उर्वरक सलाह तैयार की जा रही है…');
+  try{
+    const reply = await callChatAPI('fertilizer', {
+      crop, stage: document.getElementById('fertStage').value, soil: document.getElementById('fertSoil').value,
+      land: document.getElementById('fertLand').value || 'unspecified', pref: document.getElementById('fertPref').value,
+      lang: document.getElementById('fertLang').value
+    });
+    el.innerHTML = '<div class="result-card"><h4>🌱 उर्वरक योजना · Fertilizer Plan</h4>'+formatAI(reply)+
+      '<div class="disclaimer">सटीक मात्रा के लिए मुफ़्त Soil Health Card योजना के तहत मिट्टी परीक्षण करवाएं।</div></div>';
+  }catch(e){ showError(el,'सलाह लोड नहीं हुई। दोबारा कोशिश करें।'); }
+}
+
+/* =========================================================
+   GOVERNMENT SCHEMES (curated dataset)
+========================================================= */
+const SCHEMES = [
+{cat:'Income Support', name:'PM-KISAN (प्रधानमंत्री किसान सम्मान निधि)', desc:'सभी पात्र भूमिधारक किसान परिवारों को ₹6,000/वर्ष की सीधी आय सहायता, तीन किस्तों (₹2,000 प्रत्येक) में DBT द्वारा।', benefit:'₹6,000/वर्ष', link:'https://pmkisan.gov.in',
+  installment:{last:'23वीं किस्त: ₹2,000 — 20 जून 2026 को जारी हुई', next:'24वीं किस्त: सितंबर–अक्टूबर 2026 में संभावित (आधिकारिक तारीख अभी घोषित नहीं — हर किस्त लगभग 4 महीने के अंतराल पर आती है)', helpline:'हेल्पलाइन: 155261 / 011-24300606'}},
+{cat:'Insurance', name:'PMFBY (प्रधानमंत्री फ़सल बीमा योजना)', desc:'प्राकृतिक आपदा, कीट व रोग से फ़सल नुकसान पर बीमा सुरक्षा। कम प्रीमियम पर (ख़रीफ़ 2%, रबी 1.5%)।', benefit:'कम प्रीमियम फ़सल बीमा', link:'https://pmfby.gov.in'},
+{cat:'Credit', name:'Kisan Credit Card (KCC)', desc:'खेती, पशुपालन व मत्स्य पालन के लिए सस्ती ब्याज दर पर ऋण सुविधा, ₹3 लाख तक ब्याज सहायता सहित।', benefit:'रियायती दर पर ऋण', link:'https://www.myscheme.gov.in/schemes/kcc'},
+{cat:'Soil', name:'Soil Health Card Scheme', desc:'हर खेत की मिट्टी की मुफ़्त जाँच करवाकर NPK व पोषक तत्वों की सही मात्रा की सिफ़ारिश पाएं।', benefit:'मुफ़्त मिट्टी परीक्षण', link:'https://soilhealth.dac.gov.in'},
+{cat:'Irrigation', name:'PM-KUSUM', desc:'खेतों में सोलर पंप व ग्रिड-कनेक्टेड सोलर प्लांट लगाने पर सब्सिडी — डीज़ल पंप पर निर्भरता घटाएं।', benefit:'सोलर पंप सब्सिडी', link:'https://pmkusum.mnre.gov.in'},
+{cat:'Marketing', name:'e-NAM (राष्ट्रीय कृषि बाज़ार)', desc:'देशभर की मंडियों को जोड़ने वाला ऑनलाइन ट्रेडिंग प्लेटफ़ॉर्म — बेहतर भाव व पारदर्शी नीलामी।', benefit:'ऑनलाइन मंडी प्लेटफ़ॉर्म', link:'https://enam.gov.in'},
+{cat:'Investment', name:'Agriculture Infrastructure Fund (AIF)', desc:'भंडारण, कोल्ड स्टोरेज, प्रोसेसिंग यूनिट जैसी कृषि-बुनियादी ढांचा परियोजनाओं पर ब्याज सहायता व गारंटी।', benefit:'ब्याज सहायता (3%)', link:'https://agriinfra.dac.gov.in'},
+{cat:'Processing', name:'PM Formalisation of Micro Food Processing (PMFME)', desc:'छोटे खाद्य प्रसंस्करण उद्यमों के उन्नयन के लिए क्रेडिट-लिंक्ड सब्सिडी सहायता।', benefit:'35% तक सब्सिडी', link:'https://pmfme.mofpi.gov.in'},
+{cat:'Credit', name:'Interest Subvention Scheme (MISS)', desc:'अल्पकालिक कृषि ऋण पर ब्याज सहायता — समय पर चुकाने पर प्रभावी दर और भी कम।', benefit:'ब्याज छूट', link:'https://www.myscheme.gov.in'},
+{cat:'Sustainable', name:'Rashtriya Krishi Vikas Yojana (RKVY)', desc:'राज्य-स्तरीय कृषि व संबद्ध क्षेत्र विकास परियोजनाओं के लिए राज्य सरकारों को वित्तीय सहायता।', benefit:'राज्य कृषि विकास निधि', link:'https://rkvy.nic.in'},
+{cat:'Sustainable', name:'National Mission on Natural Farming', desc:'रासायनिक मुक्त प्राकृतिक खेती अपनाने वाले किसानों के लिए प्रशिक्षण, प्रमाणन व सहायता।', benefit:'प्राकृतिक खेती सहायता', link:'https://naturalfarming.dac.gov.in'},
+{cat:'Insurance', name:'Pradhan Mantri Fasal Bima — Weather Based (WBCIS)', desc:'मौसम-आधारित मापदंडों (वर्षा, तापमान) के आधार पर तेज़ क्लेम निपटान वाली फ़सल बीमा योजना।', benefit:'मौसम-आधारित बीमा', link:'https://pmfby.gov.in'}
+];
+let activeCat = 'All';
+function renderSchemeChips(){
+  const cats = ['All', ...new Set(SCHEMES.map(s=>s.cat))];
+  document.getElementById('schemeChips').innerHTML = cats.map(c=>
+    `<button class="chip ${c===activeCat?'active':''}" onclick="setCat('${c}')">${c}</button>`
+  ).join('');
+}
+function setCat(c){ activeCat = c; renderSchemeChips(); renderSchemes(); }
+function renderSchemes(){
+  const q = document.getElementById('schemeSearch').value.toLowerCase();
+  const filtered = SCHEMES.filter(s=>
+    (activeCat==='All' || s.cat===activeCat) &&
+    (s.name.toLowerCase().includes(q) || s.desc.toLowerCase().includes(q) || s.cat.toLowerCase().includes(q))
+  );
+  document.getElementById('schemeList').innerHTML = filtered.length ? filtered.map(s=>`
+    <div class="scheme-card">
+      <span class="tag">${s.cat}</span>
+      <h4>${s.name}</h4>
+      <p>${s.desc}</p>
+      <div class="meta-row"><b>लाभ:</b> ${s.benefit}</div>
+      ${s.installment ? `
+      <div class="installment-box">
+        <div>📅 <b>${s.installment.last}</b></div>
+        <div style="margin-top:4px;">⏭️ ${s.installment.next}</div>
+        <div style="margin-top:4px;">📞 ${s.installment.helpline}</div>
+      </div>` : ''}
+      <a href="${s.link}" target="_blank" rel="noopener">आधिकारिक वेबसाइट खोलें ›</a>
+      ${s.installment ? `<a href="https://pmkisan.gov.in/BeneficiaryStatus_New.aspx" target="_blank" rel="noopener" style="margin-left:14px;">अपनी स्थिति जांचें ›</a>` : ''}
+    </div>`).join('') : '<div class="result-card">कोई योजना नहीं मिली। खोज बदलकर देखें।</div>';
+}
+renderSchemeChips();
+renderSchemes();
+
+/* =========================================================
+   CROP PRICES
+========================================================= */
+async function getCropPrice(){
+  const el = document.getElementById('priceResult');
+  const crop = document.getElementById('priceCrop').value.trim();
+  const state = document.getElementById('priceState').value.trim();
+  if(!crop || !state){ alert('कृपया फसल और राज्य दोनों भरें'); return; }
+  showLoading(el, 'भाव की जानकारी लाई जा रही है…');
+  const mandi = document.getElementById('priceMandi').value.trim();
+  try{
+    const r = await fetch('/api/prices?crop='+encodeURIComponent(crop)+'&state='+encodeURIComponent(state)+'&mandi='+encodeURIComponent(mandi));
+    const d = await r.json();
+    if(d.source === 'live' && d.records && d.records.length){
+      let html = '<div class="result-card"><h4>📈 आज का मंडी भाव · Live Mandi Price</h4><ul>';
+      d.records.slice(0,8).forEach(rec=>{
+        html += `<li><b>${rec.market}</b> (${rec.variety||'—'}): ₹${rec.modal_price}/क्विंटल <span style="color:var(--soil-soft);">(न्यूनतम ₹${rec.min_price} – अधिकतम ₹${rec.max_price})</span></li>`;
+      });
+      html += '</ul><div class="disclaimer">स्रोत: Agmarknet / data.gov.in — दिनांक: '+ (d.records[0].arrival_date||'आज') +'</div></div>';
+      el.innerHTML = html;
+    } else {
+      // fallback to AI estimate
+      const reply = await callChatAPI('price_estimate', {crop, state, mandi: mandi||'unspecified'});
+      el.innerHTML = '<div class="result-card"><h4>📈 अनुमानित भाव · AI Estimate</h4>'+formatAI(reply)+
+        `<div class="disclaimer">⚠️ यह लाइव मंडी डेटा नहीं, केवल AI अनुमान है। सटीक आज के भाव के लिए देखें:
+        <a href="https://agmarknet.gov.in" target="_blank" style="color:var(--sky-deep);font-weight:700;">Agmarknet</a> या
+        <a href="https://enam.gov.in" target="_blank" style="color:var(--sky-deep);font-weight:700;">e-NAM</a></div></div>`;
+    }
+  }catch(e){ showError(el,'भाव लोड नहीं हो सका। दोबारा कोशिश करें।'); }
+}
+
+/* =========================================================
+   NEARBY BUYERS
+========================================================= */
+let buyerPlace = null;
+async function detectLocation(){
+  const el = document.getElementById('buyerLoc');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div>स्थान पता किया जा रहा है…</div>';
+  const coords = await fetchLocation();
+  if(!coords){ el.innerHTML = '<div class="note-box">स्थान अनुमति नहीं मिली। कृपया ब्राउज़र सेटिंग में लोकेशन चालू करें।</div>'; return; }
+  buyerPlace = await reverseGeocode(coords.lat, coords.lon);
+  el.innerHTML = '<div class="result-card">📍 पता चला: <b>'+(buyerPlace||'अज्ञात क्षेत्र')+'</b></div>';
+}
+async function getBuyerTips(){
+  const el = document.getElementById('buyerResult');
+  const crop = document.getElementById('buyerCrop').value.trim() || 'general produce';
+  showLoading(el, 'बिक्री सलाह तैयार की जा रही है…');
+  try{
+    const reply = await callChatAPI('buyer_tips', {crop, place: buyerPlace || 'India (location not detected)'});
+    el.innerHTML = '<div class="result-card"><h4>🤝 बिक्री चैनल सलाह</h4>'+formatAI(reply)+`
+      <div class="disclaimer">आधिकारिक लिंक:
+      <a href="https://enam.gov.in" target="_blank" style="color:var(--sky-deep);">e-NAM पोर्टल</a> ·
+      <a href="https://agmarknet.gov.in" target="_blank" style="color:var(--sky-deep);">Agmarknet नज़दीकी मंडी</a> ·
+      <a href="https://ncdex.com" target="_blank" style="color:var(--sky-deep);">NCDEX भाव</a>
+      </div></div>`;
+  }catch(e){ showError(el,'सलाह लोड नहीं हुई। दोबारा कोशिश करें।'); }
+}
+
+/* =========================================================
+   AI AGENT (multi-turn chat: text + voice + photo, with memory)
+========================================================= */
+let chatHistory = []; // {role:'user'|'agent', text, image?}
+let recognizing = false;
+let recognition = null;
+
+function seedAgentGreeting(){
+  if(chatHistory.length) return;
+  chatHistory.push({role:'agent', text:'नमस्ते! मैं आपका AI कृषि एजेंट हूँ 🧑‍🌾 फसल, रोग-कीट की दवा, मौसम, खाद, सिंचाई या सरकारी योजना — कुछ भी पूछें। मैं पिछली बातचीत भी याद रखता हूँ, तो आगे भी पूछ सकते हैं।\n\nHi! I\'m your AI farming agent. Type, tap the mic, or send a photo — ask me anything.'});
+  renderChatThread();
+}
+function escapeHtml(t){ return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function renderChatThread(){
+  const el = document.getElementById('chatThread');
+  el.innerHTML = chatHistory.map(m=>{
+    const bubbleContent = (m.role==='agent') ? formatAI(m.text) : '<p>'+escapeHtml(m.text)+'</p>';
+    const img = m.image ? '<img src="'+m.image+'">' : '';
+    const avatar = m.role==='agent' ? '<div class="chat-avatar">🧑‍🌾</div>' : '';
+    return `<div class="chat-row ${m.role}">${avatar}<div class="chat-bubble ${m.role}">${img}${bubbleContent}</div></div>`;
+  }).join('');
+  el.scrollIntoView({behavior:'smooth', block:'end'});
+}
+function appendChat(role, text, image){
+  chatHistory.push({role, text, image: image||null});
+  renderChatThread();
+}
+function addTempLoadingBubble(msg){
+  const el = document.getElementById('chatThread');
+  el.insertAdjacentHTML('beforeend',
+    '<div class="chat-row agent"><div class="chat-avatar">🧑‍🌾</div><div class="chat-bubble agent">'+
+    '<div class="loading" style="padding:0;"><div class="spinner"></div>'+msg+'</div></div></div>');
+  el.scrollIntoView({behavior:'smooth', block:'end'});
+}
+async function callAgent(question, opts){
+  opts = opts || {};
+  const [langCode, langLabel] = document.getElementById('voiceLang').value.split('|');
+  const historyForApi = chatHistory.slice(0,-1).slice(-10).map(m=>({role:m.role, text:m.text}));
+  addTempLoadingBubble('सोच रहा हूँ…');
+  try{
+    const reply = await callChatAPI('agent', {question, lang: langLabel, history: historyForApi});
+    appendChat('agent', reply);
+    if(opts.speak) speak(reply, langCode);
+  }catch(e){
+    appendChat('agent', '⚠️ जवाब नहीं मिल सका। इंटरनेट जाँचकर दोबारा कोशिश करें।');
+  }
+}
+function sendAgentText(){
+  const input = document.getElementById('chatTextInput');
+  const text = input.value.trim();
+  if(!text) return;
+  appendChat('user', text);
+  input.value = '';
+  callAgent(text, {speak:false});
+}
+document.getElementById('agentFileInput').addEventListener('change', async function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  e.target.value = '';
+  const dataUrl = await resizeImageFileToDataURL(file);
+  appendChat('user', '📷 फोटो भेजी गई', dataUrl);
+  const [, langLabel] = document.getElementById('voiceLang').value.split('|');
+  addTempLoadingBubble('फोटो जाँची जा रही है…');
+  try{
+    const reply = await callVisionAPI(dataUrl, langLabel);
+    appendChat('agent', reply);
+  }catch(err){
+    appendChat('agent', '⚠️ फोटो जाँच नहीं हो सकी। दोबारा कोशिश करें।');
+  }
+});
+function toggleListening(){
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognition){
+    alert('माफ़ करें, आपका ब्राउज़र आवाज़ पहचान समर्थित नहीं करता। कृपया Chrome का उपयोग करें।');
+    return;
+  }
+  if(recognizing){ recognition.stop(); return; }
+  const [langCode] = document.getElementById('voiceLang').value.split('|');
+  recognition = new SpeechRecognition();
+  recognition.lang = langCode;
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+  recognition.onstart = ()=>{
+    recognizing = true;
+    document.getElementById('micBtn').classList.add('listening');
+    document.getElementById('micHint').textContent = 'सुन रहा हूँ… बोलिए';
+  };
+  recognition.onerror = ()=>{
+    recognizing = false;
+    document.getElementById('micBtn').classList.remove('listening');
+    document.getElementById('micHint').textContent = 'सुनाई नहीं दिया, दोबारा कोशिश करें';
+  };
+  recognition.onend = ()=>{
+    recognizing = false;
+    document.getElementById('micBtn').classList.remove('listening');
+    document.getElementById('micHint').textContent = 'लिखें, माइक दबाएँ, या 📷 से फोटो भेजें';
+  };
+  recognition.onresult = (event)=>{
+    const said = event.results[0][0].transcript;
+    appendChat('user', said);
+    callAgent(said, {speak:true});
+  };
+  recognition.start();
+}
+function speak(text, langCode){
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const clean = text.replace(/\*\*/g,'').replace(/[-•]\s+/g,'. ');
+  const utter = new SpeechSynthesisUtterance(clean.slice(0,600));
+  utter.lang = langCode;
+  utter.rate = 0.95;
+  window.speechSynthesis.speak(utter);
+}
+seedAgentGreeting();
+</script>
+</body>
+</html>
